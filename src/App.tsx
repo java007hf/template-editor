@@ -246,10 +246,10 @@ function App() {
     switch (templateData.selectedTemplate) {
       case 'template1':
         return (
-          <div className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-lg shadow-lg min-h-[600px]">
-            <div className="grid grid-cols-3 gap-8 h-full">
+          <div className="bg-gradient-to-br from-blue-50 to-white pt-8 pb-8 pl-8 pr-0 rounded-lg shadow-lg min-h-[600px]">
+            <div className="grid grid-cols-4 gap-1 h-full relative">
               {/* 左侧：标题+图片+正文 */}
-              <div className="col-span-2 space-y-4">
+              <div className="col-span-3 space-y-4 pr-0">
                 <h1 className="text-2xl font-bold text-gray-800">{templateData.title}</h1>
                 {templateData.image && (
                   <div className="w-full flex justify-center">
@@ -267,8 +267,12 @@ function App() {
                   </ReactMarkdown>
                 </div>
               </div>
+              
+              {/* 蓝色虚线分隔线 */}
+              <div className="absolute left-3/4 top-0 bottom-0 w-px border-l-2 border-dashed border-blue-400 -ml-1"></div>
+              
               {/* 右侧：单词列表 */}
-              <div className="space-y-4">
+              <div className="space-y-4 pl-1 pr-0">
                 {/* 二维码图片 - 自适应尺寸，更紧凑 */}
                 {templateData.qrCode && (
                   <div className="text-center mb-2">
