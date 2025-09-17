@@ -18,6 +18,7 @@ interface TemplateData {
   content: string
   image: string | null
   selectedTemplate: string
+  wordList: string
 }
 
 const templates = [
@@ -100,7 +101,8 @@ function App() {
     title: '示例标题',
     content: '这里是正文内容，您可以编辑这段文字来预览效果。',
     image: null,
-    selectedTemplate: 'template1'
+    selectedTemplate: 'template1',
+    wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果'
   })
   
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -162,7 +164,8 @@ function App() {
       title: '示例标题',
       content: '这里是正文内容，您可以编辑这段文字来预览效果。',
       image: null,
-      selectedTemplate: 'template1'
+      selectedTemplate: 'template1',
+      wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果'
     })
   }
 
@@ -172,30 +175,32 @@ function App() {
         return (
           <div className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-lg shadow-lg min-h-[600px]">
             <div className="grid grid-cols-2 gap-8 h-full">
-              <div className="space-y-4">
-                <div className="bg-blue-100 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-blue-800 mb-2">关键词</h3>
-                  <div className="space-y-2">
-                    {templateData.title.split(' ').slice(0, 5).map((word, index) => (
-                      <div key={index} className="bg-white px-3 py-1 rounded text-blue-700 text-sm">
-                        {word}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {/* 左侧：标题+图片+正文 */}
               <div className="space-y-4">
                 <h1 className="text-2xl font-bold text-gray-800">{templateData.title}</h1>
+                {templateData.image && (
+                  <div>
+                    <img src={templateData.image} alt="上传的图片" className="w-full h-48 object-cover rounded-lg shadow-md" />
+                  </div>
+                )}
                 <div className="prose text-gray-600 leading-relaxed">
                   {templateData.content.split('\n').map((paragraph, index) => (
                     <p key={index} className="mb-3">{paragraph}</p>
                   ))}
                 </div>
-                {templateData.image && (
-                  <div className="mt-4">
-                    <img src={templateData.image} alt="上传的图片" className="w-full h-48 object-cover rounded-lg shadow-md" />
+              </div>
+              {/* 右侧：单词列表 */}
+              <div className="space-y-4">
+                <div className="bg-blue-100 p-4 rounded-lg">
+                  <h3 className="text-lg font-bold text-blue-800 mb-4">重点单词</h3>
+                  <div className="space-y-2">
+                    {templateData.wordList.split('\n').filter(word => word.trim()).map((word, index) => (
+                      <div key={index} className="bg-white px-3 py-2 rounded text-blue-700 text-sm shadow-sm border-l-4 border-blue-500">
+                        {word.trim()}
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
@@ -466,6 +471,21 @@ function App() {
                   rows={8}
                   className="mt-1"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="wordList">重点单词列表</Label>
+                <Textarea
+                  id="wordList"
+                  value={templateData.wordList}
+                  onChange={(e) => setTemplateData(prev => ({ ...prev, wordList: e.target.value }))}
+                  placeholder="请输入重点单词，每行一个单词"
+                  rows={6}
+                  className="mt-1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  提示：每行输入一个单词，这些单词将显示在双栏布局模板的右侧
+                </p>
               </div>
             </CardContent>
           </Card>
