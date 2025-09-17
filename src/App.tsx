@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, memo, useMemo } from 'react'
+import React, { useState, useRef, useCallback, memo, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,41 @@ interface TemplateData {
   wordList: string
   qrCode: string | null
 }
+
+// Memoized 输入组件，防止焦点丢失
+const MemoizedInput = memo(({ id, value, onChange, placeholder, className }: {
+  id: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  placeholder: string
+  className: string
+}) => (
+  <Input
+    id={id}
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    className={className}
+  />
+))
+
+const MemoizedTextarea = memo(({ id, value, onChange, placeholder, rows, className }: {
+  id: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+  placeholder: string
+  rows: number
+  className: string
+}) => (
+  <Textarea
+    id={id}
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    rows={rows}
+    className={className}
+  />
+))
 
 const templates = [
   {
@@ -460,8 +495,8 @@ function App() {
     }
   }, [templateData])
 
-  // 简单编辑器组件
-  const SimpleEditor = () => (
+  // 简单编辑器组件 - 使用 memo 防止不必要的重新渲染
+  const SimpleEditor = useMemo(() => (
     <div className="max-w-7xl mx-auto p-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 左侧编辑区域 */}
@@ -502,7 +537,7 @@ function App() {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="title">标题</Label>
-                <Input
+                <MemoizedInput
                   id="title"
                   value={templateData.title}
                   onChange={handleTitleChange}
@@ -513,7 +548,7 @@ function App() {
               
               <div>
                 <Label htmlFor="content">正文内容</Label>
-                <Textarea
+                <MemoizedTextarea
                   id="content"
                   value={templateData.content}
                   onChange={handleContentChange}
@@ -525,7 +560,7 @@ function App() {
 
               <div>
                 <Label htmlFor="wordList">重点单词列表</Label>
-                <Textarea
+                <MemoizedTextarea
                   id="wordList"
                   value={templateData.wordList}
                   onChange={handleWordListChange}
@@ -626,7 +661,7 @@ function App() {
         </div>
       </div>
     </div>
-  )
+  ), [templateData, handleTitleChange, handleContentChange, handleWordListChange, handleTemplateChange, renderTemplate])
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -678,7 +713,7 @@ function App() {
           </div>
 
           <TabsContent value="simple" className="m-0">
-            <SimpleEditor />
+            {SimpleEditor}
           </TabsContent>
 
           <TabsContent value="visual" className="m-0 h-full">
