@@ -19,6 +19,7 @@ interface TemplateData {
   image: string | null
   selectedTemplate: string
   wordList: string
+  qrCode: string | null
 }
 
 const templates = [
@@ -102,10 +103,12 @@ function App() {
     content: '这里是正文内容，您可以编辑这段文字来预览效果。',
     image: null,
     selectedTemplate: 'template1',
-    wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果'
+    wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果',
+    qrCode: null
   })
   
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const qrCodeInputRef = useRef<HTMLInputElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,6 +117,17 @@ function App() {
       const reader = new FileReader()
       reader.onload = (e) => {
         setTemplateData(prev => ({ ...prev, image: e.target?.result as string }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleQrCodeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setTemplateData(prev => ({ ...prev, qrCode: e.target?.result as string }))
       }
       reader.readAsDataURL(file)
     }
@@ -165,7 +179,8 @@ function App() {
       content: '这里是正文内容，您可以编辑这段文字来预览效果。',
       image: null,
       selectedTemplate: 'template1',
-      wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果'
+      wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果',
+      qrCode: null
     })
   }
 
@@ -174,9 +189,9 @@ function App() {
       case 'template1':
         return (
           <div className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-lg shadow-lg min-h-[600px]">
-            <div className="grid grid-cols-2 gap-8 h-full">
+            <div className="grid grid-cols-3 gap-8 h-full">
               {/* 左侧：标题+图片+正文 */}
-              <div className="space-y-4">
+              <div className="col-span-2 space-y-4">
                 <h1 className="text-2xl font-bold text-gray-800">{templateData.title}</h1>
                 {templateData.image && (
                   <div>
@@ -191,11 +206,21 @@ function App() {
               </div>
               {/* 右侧：单词列表 */}
               <div className="space-y-4">
-                <div className="bg-blue-100 p-4 rounded-lg">
-                  <h3 className="text-lg font-bold text-blue-800 mb-4">重点单词</h3>
-                  <div className="space-y-2">
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  {/* 二维码图片 */}
+                  {templateData.qrCode && (
+                    <div className="mb-3 text-center">
+                      <img src={templateData.qrCode} alt="二维码" className="w-16 h-16 mx-auto rounded" />
+                    </div>
+                  )}
+                  <div className="space-y-1">
                     {templateData.wordList.split('\n').filter(word => word.trim()).map((word, index) => (
-                      <div key={index} className="bg-white px-3 py-2 rounded text-blue-700 text-sm shadow-sm border-l-4 border-blue-500">
+                      <div 
+                        key={index} 
+                        className={`px-2 py-1 rounded-lg text-white text-xs font-medium text-center shadow-sm ${
+                          index % 2 === 0 ? 'bg-blue-500' : 'bg-yellow-500'
+                        }`}
+                      >
                         {word.trim()}
                       </div>
                     ))}
@@ -519,6 +544,38 @@ function App() {
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
+                className="hidden"
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>二维码上传</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div 
+                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                onClick={() => qrCodeInputRef.current?.click()}
+              >
+                {templateData.qrCode ? (
+                  <div className="space-y-2">
+                    <img src={templateData.qrCode} alt="二维码预览" className="max-w-full h-32 object-cover mx-auto rounded" />
+                    <p className="text-sm text-gray-600">点击更换二维码</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto" />
+                    <p className="text-gray-600">点击上传二维码图片</p>
+                    <p className="text-sm text-gray-400">用于双栏布局模板右侧显示</p>
+                  </div>
+                )}
+              </div>
+              <input
+                ref={qrCodeInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleQrCodeUpload}
                 className="hidden"
               />
             </CardContent>
