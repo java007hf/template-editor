@@ -1,4 +1,7 @@
 import React, { useState, useRef, useCallback, memo, useMemo } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -135,7 +138,7 @@ const templates = [
 function App() {
   const [templateData, setTemplateData] = useState<TemplateData>({
     title: '示例标题',
-    content: '这里是正文内容，您可以编辑这段文字来预览效果。',
+    content: '# 这里是正文内容\n\n您可以编辑这段文字来预览效果。支持 **Markdown** 格式：\n\n- 列表项目 1\n- 列表项目 2\n- 列表项目 3\n\n> 这是一个引用块\n\n`代码示例` 和 [链接示例](https://example.com)\n\n也支持 HTML 标签：<span style="background-color: #ffff00; border-radius: 8px; padding: 0 3px;">高亮文本</span>',
     image: null,
     selectedTemplate: 'template1',
     wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果',
@@ -231,7 +234,7 @@ function App() {
   const resetForm = () => {
     setTemplateData({
       title: '示例标题',
-      content: '这里是正文内容，您可以编辑这段文字来预览效果。',
+      content: '# 这里是正文内容\n\n您可以编辑这段文字来预览效果。支持 **Markdown** 格式：\n\n- 列表项目 1\n- 列表项目 2\n- 列表项目 3\n\n> 这是一个引用块\n\n`代码示例` 和 [链接示例](https://example.com)\n\n也支持 HTML 标签：<span style="background-color: #ffff00; border-radius: 8px; padding: 0 3px;">高亮文本</span>',
       image: null,
       selectedTemplate: 'template1',
       wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果',
@@ -258,10 +261,10 @@ function App() {
                     />
                   </div>
                 )}
-                <div className="prose text-gray-600 leading-relaxed">
-                  {templateData.content.split('\n').map((paragraph, index) => (
-                    <p key={index} className="mb-3">{paragraph}</p>
-                  ))}
+                <div className="prose text-gray-600 leading-relaxed max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                    {templateData.content}
+                  </ReactMarkdown>
                 </div>
               </div>
               {/* 右侧：单词列表 */}
@@ -306,10 +309,10 @@ function App() {
                 </div>
               )}
               
-              <div className="prose prose-lg text-gray-700 leading-relaxed">
-                {templateData.content.split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-4 text-justify">{paragraph}</p>
-                ))}
+              <div className="prose prose-lg text-gray-700 leading-relaxed max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                  {templateData.content}
+                </ReactMarkdown>
               </div>
             </div>
           </div>
@@ -330,11 +333,13 @@ function App() {
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-4">
-                  {templateData.content.split('\n').map((paragraph, index) => (
-                    <div key={index} className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-400">
-                      <p className="text-gray-700 leading-relaxed">{paragraph}</p>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-400">
+                    <div className="prose text-gray-700 leading-relaxed max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                        {templateData.content}
+                      </ReactMarkdown>
                     </div>
-                  ))}
+                  </div>
                 </div>
                 
                 <div className="space-y-4">
@@ -366,17 +371,19 @@ function App() {
               <div className="space-y-4">
                 <h2 className="text-lg font-bold text-gray-800 border-b pb-2">新闻要点</h2>
                 <div className="text-sm text-gray-600 space-y-2">
-                  {templateData.content.split('\n').slice(0, 3).map((line, index) => (
-                    <p key={index} className="bg-gray-50 p-2 rounded">{line}</p>
-                  ))}
+                  <div className="bg-gray-50 p-2 rounded prose prose-sm max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                      {templateData.content.split('\n').slice(0, 3).join('\n')}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
               <div className="space-y-4">
                 <h1 className="text-xl font-bold text-gray-800">{templateData.title}</h1>
-                <div className="text-gray-600">
-                  {templateData.content.split('\n').map((paragraph, index) => (
-                    <p key={index} className="mb-2">{paragraph}</p>
-                  ))}
+                <div className="prose text-gray-600 max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                    {templateData.content}
+                  </ReactMarkdown>
                 </div>
               </div>
               <div className="space-y-4">
@@ -405,7 +412,11 @@ function App() {
                   <img src={templateData.image} alt="产品图片" className="w-full h-auto rounded-lg mb-4" style={{ maxHeight: '300px', width: 'auto', objectFit: 'contain' }} />
                 )}
                 <h3 className="font-semibold text-gray-800 mb-2">产品特色</h3>
-                <p className="text-gray-600 text-sm">{templateData.content}</p>
+                <div className="prose prose-sm text-gray-600 max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                    {templateData.content}
+                  </ReactMarkdown>
+                </div>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="font-semibold text-gray-800 mb-4">产品详情</h3>
@@ -452,7 +463,11 @@ function App() {
             </div>
             <div className="bg-gray-800 p-4 rounded-lg">
               <h3 className="font-semibold mb-2">系统状态</h3>
-              <p className="text-gray-300 text-sm">{templateData.content}</p>
+              <div className="prose prose-sm text-gray-300 max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                  {templateData.content}
+                </ReactMarkdown>
+              </div>
             </div>
           </div>
         )
@@ -478,10 +493,10 @@ function App() {
               {templateData.image && (
                 <img src={templateData.image} alt="模板图片" className="max-w-md h-auto mx-auto rounded-lg" style={{ maxHeight: '300px', width: 'auto', objectFit: 'contain' }} />
               )}
-              <div className="text-gray-600 text-left max-w-2xl mx-auto">
-                {templateData.content.split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-3">{paragraph}</p>
-                ))}
+              <div className="prose text-gray-600 text-left max-w-2xl mx-auto">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                  {templateData.content}
+                </ReactMarkdown>
               </div>
               <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded">
                 此模板正在开发中，敬请期待更丰富的布局效果
@@ -552,7 +567,7 @@ function App() {
                   id="content"
                   value={templateData.content}
                   onChange={handleContentChange}
-                  placeholder="请输入正文内容，支持多行文本"
+                  placeholder="请输入正文内容，支持 Markdown 格式和 HTML 标签（如 **粗体**、<span style='color:red'>HTML样式</span>）"
                   rows={8}
                   className="mt-1"
                 />
