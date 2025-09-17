@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback, memo, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -111,7 +111,7 @@ function App() {
   const qrCodeInputRef = useRef<HTMLInputElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       const reader = new FileReader()
@@ -120,9 +120,9 @@ function App() {
       }
       reader.readAsDataURL(file)
     }
-  }
+  }, [])
 
-  const handleQrCodeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleQrCodeUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       const reader = new FileReader()
@@ -131,11 +131,31 @@ function App() {
       }
       reader.readAsDataURL(file)
     }
-  }
+  }, [])
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-  }
+  }, [])
+
+  // 优化输入框事件处理函数 - 使用稳定的引用
+  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setTemplateData(prev => ({ ...prev, title: value }))
+  }, [])
+
+  const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setTemplateData(prev => ({ ...prev, content: value }))
+  }, [])
+
+  const handleWordListChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setTemplateData(prev => ({ ...prev, wordList: value }))
+  }, [])
+
+  const handleTemplateChange = useCallback((value: string) => {
+    setTemplateData(prev => ({ ...prev, selectedTemplate: value }))
+  }, [])
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
@@ -184,7 +204,7 @@ function App() {
     })
   }
 
-  const renderTemplate = () => {
+  const renderTemplate = useCallback(() => {
     switch (templateData.selectedTemplate) {
       case 'template1':
         return (
@@ -194,8 +214,13 @@ function App() {
               <div className="col-span-2 space-y-4">
                 <h1 className="text-2xl font-bold text-gray-800">{templateData.title}</h1>
                 {templateData.image && (
-                  <div>
-                    <img src={templateData.image} alt="上传的图片" className="w-full h-48 object-cover rounded-lg shadow-md" />
+                  <div className="w-full flex justify-center">
+                    <img 
+                      src={templateData.image} 
+                      alt="上传的图片" 
+                      className="max-w-full h-auto rounded-lg shadow-md"
+                      style={{ maxHeight: '400px', width: 'auto', objectFit: 'contain' }}
+                    />
                   </div>
                 )}
                 <div className="prose text-gray-600 leading-relaxed">
@@ -206,18 +231,18 @@ function App() {
               </div>
               {/* 右侧：单词列表 */}
               <div className="space-y-4">
+                {/* 二维码图片 - 自适应尺寸，更紧凑 */}
+                {templateData.qrCode && (
+                  <div className="text-center mb-2">
+                    <img src={templateData.qrCode} alt="二维码" className="max-w-full h-auto mx-auto rounded-lg shadow-sm" style={{ maxHeight: '120px', objectFit: 'contain' }} />
+                  </div>
+                )}
                 <div className="bg-gray-50 p-3 rounded-lg">
-                  {/* 二维码图片 */}
-                  {templateData.qrCode && (
-                    <div className="mb-3 text-center">
-                      <img src={templateData.qrCode} alt="二维码" className="w-16 h-16 mx-auto rounded" />
-                    </div>
-                  )}
                   <div className="space-y-1">
                     {templateData.wordList.split('\n').filter(word => word.trim()).map((word, index) => (
                       <div 
                         key={index} 
-                        className={`px-2 py-1 rounded-lg text-white text-xs font-medium text-center shadow-sm ${
+                        className={`px-1 py-0.5 rounded-md text-white text-[10px] font-medium text-center shadow-sm ${
                           index % 2 === 0 ? 'bg-blue-500' : 'bg-yellow-500'
                         }`}
                       >
@@ -242,7 +267,7 @@ function App() {
               
               {templateData.image && (
                 <div className="flex justify-center">
-                  <img src={templateData.image} alt="插图" className="max-w-md h-64 object-cover rounded-lg shadow-md" />
+                  <img src={templateData.image} alt="插图" className="max-w-md h-auto rounded-lg shadow-md" style={{ maxHeight: '400px', width: 'auto', objectFit: 'contain' }} />
                 </div>
               )}
               
@@ -280,7 +305,7 @@ function App() {
                 <div className="space-y-4">
                   {templateData.image && (
                     <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <img src={templateData.image} alt="配图" className="w-full h-48 object-cover rounded-lg" />
+                      <img src={templateData.image} alt="配图" className="w-full h-auto rounded-lg" style={{ maxHeight: '300px', width: 'auto', objectFit: 'contain' }} />
                       <p className="text-sm text-gray-500 mt-2 text-center">配图说明</p>
                     </div>
                   )}
@@ -321,7 +346,7 @@ function App() {
               </div>
               <div className="space-y-4">
                 {templateData.image && (
-                  <img src={templateData.image} alt="新闻图片" className="w-full h-32 object-cover rounded" />
+                  <img src={templateData.image} alt="新闻图片" className="w-full h-auto rounded" style={{ maxHeight: '200px', width: 'auto', objectFit: 'contain' }} />
                 )}
                 <div className="bg-blue-50 p-3 rounded">
                   <h3 className="font-semibold text-blue-800 mb-2">相关链接</h3>
@@ -342,7 +367,7 @@ function App() {
             <div className="grid grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-lg shadow-md">
                 {templateData.image && (
-                  <img src={templateData.image} alt="产品图片" className="w-full h-48 object-cover rounded-lg mb-4" />
+                  <img src={templateData.image} alt="产品图片" className="w-full h-auto rounded-lg mb-4" style={{ maxHeight: '300px', width: 'auto', objectFit: 'contain' }} />
                 )}
                 <h3 className="font-semibold text-gray-800 mb-2">产品特色</h3>
                 <p className="text-gray-600 text-sm">{templateData.content}</p>
@@ -416,7 +441,7 @@ function App() {
                 </p>
               </div>
               {templateData.image && (
-                <img src={templateData.image} alt="模板图片" className="max-w-md h-48 object-cover mx-auto rounded-lg" />
+                <img src={templateData.image} alt="模板图片" className="max-w-md h-auto mx-auto rounded-lg" style={{ maxHeight: '300px', width: 'auto', objectFit: 'contain' }} />
               )}
               <div className="text-gray-600 text-left max-w-2xl mx-auto">
                 {templateData.content.split('\n').map((paragraph, index) => (
@@ -433,7 +458,7 @@ function App() {
       default:
         return <div>模板加载中...</div>
     }
-  }
+  }, [templateData])
 
   // 简单编辑器组件
   const SimpleEditor = () => (
@@ -451,7 +476,7 @@ function App() {
             <CardContent>
               <Select 
                 value={templateData.selectedTemplate} 
-                onValueChange={(value) => setTemplateData(prev => ({ ...prev, selectedTemplate: value }))}
+                onValueChange={handleTemplateChange}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="选择模板" />
@@ -480,7 +505,7 @@ function App() {
                 <Input
                   id="title"
                   value={templateData.title}
-                  onChange={(e) => setTemplateData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={handleTitleChange}
                   placeholder="请输入标题"
                   className="mt-1"
                 />
@@ -491,7 +516,7 @@ function App() {
                 <Textarea
                   id="content"
                   value={templateData.content}
-                  onChange={(e) => setTemplateData(prev => ({ ...prev, content: e.target.value }))}
+                  onChange={handleContentChange}
                   placeholder="请输入正文内容，支持多行文本"
                   rows={8}
                   className="mt-1"
@@ -503,7 +528,7 @@ function App() {
                 <Textarea
                   id="wordList"
                   value={templateData.wordList}
-                  onChange={(e) => setTemplateData(prev => ({ ...prev, wordList: e.target.value }))}
+                  onChange={handleWordListChange}
                   placeholder="请输入重点单词，每行一个单词"
                   rows={6}
                   className="mt-1"
@@ -528,7 +553,7 @@ function App() {
               >
                 {templateData.image ? (
                   <div className="space-y-2">
-                    <img src={templateData.image} alt="预览" className="max-w-full h-32 object-cover mx-auto rounded" />
+                    <img src={templateData.image} alt="预览" className="max-w-full h-auto mx-auto rounded" style={{ maxHeight: '200px', width: 'auto', objectFit: 'contain' }} />
                     <p className="text-sm text-gray-600">点击或拖拽更换图片</p>
                   </div>
                 ) : (
@@ -560,7 +585,7 @@ function App() {
               >
                 {templateData.qrCode ? (
                   <div className="space-y-2">
-                    <img src={templateData.qrCode} alt="二维码预览" className="max-w-full h-32 object-cover mx-auto rounded" />
+                    <img src={templateData.qrCode} alt="二维码预览" className="max-w-full h-auto mx-auto rounded" style={{ maxHeight: '300px', width: 'auto', objectFit: 'contain' }} />
                     <p className="text-sm text-gray-600">点击更换二维码</p>
                   </div>
                 ) : (
