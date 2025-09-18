@@ -206,21 +206,35 @@ export function SimpleVisualEditor() {
         return
       }
       
+      console.log('开始导出，画布元素:', canvas)
+      
+      // 等待一小段时间确保样式完全应用
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
       const html2canvas = (await import('html2canvas')).default
       const canvasElement = await html2canvas(canvas as HTMLElement, {
         backgroundColor: '#ffffff',
         scale: 2,
-        useCORS: true
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        logging: true,
+        width: canvas.clientWidth,
+        height: canvas.clientHeight,
+        scrollX: 0,
+        scrollY: 0
       })
       
       const link = document.createElement('a')
-      link.download = `${currentTemplateName}-${Date.now()}.png`
-      link.href = canvasElement.toDataURL()
+      link.download = `${currentTemplateName}-fixed-${Date.now()}.png`
+      link.href = canvasElement.toDataURL('image/png', 1.0)
       link.click()
+      
+      console.log('导出完成')
       alert('图片导出成功！')
     } catch (error) {
       console.error('导出失败:', error)
-      alert('导出失败，请稍后再试')
+      alert('导出失败: ' + error.message)
     }
   }
 
@@ -364,7 +378,13 @@ export function SimpleVisualEditor() {
         return (
           <div
             key={element.id}
-            style={commonStyle}
+            style={{
+              ...commonStyle,
+              textAlign: 'center',
+              wordWrap: 'break-word',
+              whiteSpace: 'pre-wrap',
+              overflow: 'hidden'
+            }}
             onClick={handleClick}
             onMouseDown={handleMouseDown}
             draggable

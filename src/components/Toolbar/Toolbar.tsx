@@ -73,23 +73,69 @@ export function Toolbar({ className }: ToolbarProps) {
   // 处理导出PNG
   const handleExportPNG = async () => {
     const canvas = document.querySelector('[data-canvas="true"]') as HTMLElement
-    if (!canvas) return
+    if (!canvas) {
+      console.error('找不到画布元素')
+      return
+    }
 
     try {
       const html2canvas = (await import('html2canvas')).default
+      
+      // 调试：输出画布信息
+      console.log('画布元素:', canvas)
+      console.log('画布尺寸:', canvas.offsetWidth, 'x', canvas.offsetHeight)
+      
+      // 调试：检查文字元素
+      const textElements = canvas.querySelectorAll('[data-element-type="text"]')
+      console.log('找到文字元素数量:', textElements.length)
+      textElements.forEach((el, index) => {
+        const computedStyle = window.getComputedStyle(el)
+        console.log(`文字元素 ${index}:`, {
+          element: el,
+          display: computedStyle.display,
+          alignItems: computedStyle.alignItems,
+          justifyContent: computedStyle.justifyContent,
+          width: computedStyle.width,
+          height: computedStyle.height,
+          textContent: el.textContent
+        })
+      })
+      
+      // 等待一小段时间确保样式完全应用
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
       const canvasElement = await html2canvas(canvas, {
         backgroundColor: '#ffffff',
         scale: 2,
-        useCORS: true
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        logging: true, // 启用日志来调试
+        width: canvas.offsetWidth,
+        height: canvas.offsetHeight,
+        scrollX: 0,
+        scrollY: 0,
+        ignoreElements: (element) => {
+          // 忽略选择框、调整手柄等UI元素
+          const shouldIgnore = element.classList.contains('ring-2') || 
+                 element.classList.contains('resize-handle') ||
+                 element.getAttribute('data-ignore-export') === 'true'
+          if (shouldIgnore) {
+            console.log('忽略元素:', element)
+          }
+          return shouldIgnore
+        }
       })
       
       const link = document.createElement('a')
-      link.download = `${state.currentTemplate.name || '模板'}-${Date.now()}.png`
-      link.href = canvasElement.toDataURL()
+      link.download = `${state.currentTemplate.name || '模板'}-fixed-${Date.now()}.png`
+      link.href = canvasElement.toDataURL('image/png', 1.0)
       link.click()
+      
+      console.log('导出完成')
     } catch (error) {
       console.error('导出失败:', error)
-      alert('导出功能需要安装html2canvas库，请稍后再试')
+      alert('导出失败: ' + error.message)
     }
   }
 

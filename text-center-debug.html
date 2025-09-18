@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字居中调试页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        /* 方法1：transform方式（html2canvas可能有问题） */
+        .text-element-transform {
+            position: relative;
+            width: 300px;
+            height: 100px;
+            background-color: #e0e0e0;
+            border: 2px solid #ccc;
+            margin: 10px 0;
+        }
+        
+        .text-content-transform {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            word-wrap: break-word;
+            padding: 5px;
+        }
+        
+        /* 方法2：flexbox方式（应该在html2canvas中工作良好） */
+        .text-element-flex {
+            width: 300px;
+            height: 100px;
+            background-color: #e0e0e0;
+            border: 2px solid #ccc;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            overflow: hidden;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        
+        /* 方法3：table-cell方式 */
+        .text-element-table {
+            width: 300px;
+            height: 100px;
+            background-color: #e0e0e0;
+            border: 2px solid #ccc;
+            margin: 10px 0;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            word-wrap: break-word;
+            padding: 5px;
+        }
+        
+        /* 方法4：grid方式 */
+        .text-element-grid {
+            width: 300px;
+            height: 100px;
+            background-color: #e0e0e0;
+            border: 2px solid #ccc;
+            margin: 10px 0;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            word-wrap: break-word;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        
+        .export-buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #2563eb;
+        }
+        
+        .comparison-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .method-container {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .preview-note {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto max-w-6xl">
+        <h1 class="text-3xl font-bold text-center mb-8">文字居中方法对比测试</h1>
+        
+        <div class="preview-note">
+            <strong>测试说明：</strong>
+            <br>• 在浏览器中预览时，所有方法都应该显示居中
+            <br>• 使用html2canvas导出时，transform方法可能会出现偏移
+            <br>• flexbox、table-cell、grid方法在html2canvas中应该表现良好
+        </div>
+        
+        <div class="comparison-container">
+            <div class="method-container">
+                <div class="test-section">
+                    <div class="test-title">方法1：transform translate(-50%, -50%)</div>
+                    <div class="text-element-transform" id="transform-test">
+                        <div class="text-content-transform">
+                            测试文字居中效果<br>Transform方法
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="method-container">
+                <div class="test-section">
+                    <div class="test-title">方法2：flexbox (推荐)</div>
+                    <div class="text-element-flex" id="flex-test">
+                        测试文字居中效果<br>Flexbox方法
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-container">
+            <div class="method-container">
+                <div class="test-section">
+                    <div class="test-title">方法3：table-cell</div>
+                    <div class="text-element-table" id="table-test">
+                        测试文字居中效果<br>Table-cell方法
+                    </div>
+                </div>
+            </div>
+            
+            <div class="method-container">
+                <div class="test-section">
+                    <div class="test-title">方法4：CSS Grid</div>
+                    <div class="text-element-grid" id="grid-test">
+                        测试文字居中效果<br>Grid方法
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="export-buttons">
+            <button onclick="exportAll()">导出所有测试 (html2canvas)</button>
+            <button onclick="exportSingle('transform-test', 'transform')">导出Transform</button>
+            <button onclick="exportSingle('flex-test', 'flexbox')">导出Flexbox</button>
+            <button onclick="exportSingle('table-test', 'table-cell')">导出Table-cell</button>
+            <button onclick="exportSingle('grid-test', 'grid')">导出Grid</button>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">导出结果分析</div>
+            <div id="export-results" class="text-sm text-gray-600">
+                点击导出按钮后，这里会显示导出结果分析...
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let exportCount = 0;
+        
+        async function exportSingle(elementId, methodName) {
+            try {
+                const element = document.getElementById(elementId);
+                if (!element) {
+                    alert('找不到元素: ' + elementId);
+                    return;
+                }
+                
+                console.log(`开始导出 ${methodName} 方法...`);
+                
+                const canvas = await html2canvas(element, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    foreignObjectRendering: false,
+                    logging: true,
+                    width: element.offsetWidth,
+                    height: element.offsetHeight
+                });
+                
+                const link = document.createElement('a');
+                link.download = `text-center-${methodName}-${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+                
+                exportCount++;
+                updateResults(`${methodName} 方法导出完成`);
+                
+            } catch (error) {
+                console.error(`${methodName} 导出失败:`, error);
+                alert(`${methodName} 导出失败: ` + error.message);
+            }
+        }
+        
+        async function exportAll() {
+            const methods = [
+                { id: 'transform-test', name: 'transform' },
+                { id: 'flex-test', name: 'flexbox' },
+                { id: 'table-test', name: 'table-cell' },
+                { id: 'grid-test', name: 'grid' }
+            ];
+            
+            updateResults('开始批量导出...');
+            
+            for (const method of methods) {
+                await exportSingle(method.id, method.name);
+                // 添加延迟避免过快执行
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            updateResults('所有方法导出完成！请检查下载的图片，对比文字居中效果。');
+        }
+        
+        function updateResults(message) {
+            const resultsDiv = document.getElementById('export-results');
+            const timestamp = new Date().toLocaleTimeString();
+            resultsDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+        }
+        
+        // 页面加载完成后显示初始信息
+        document.addEventListener('DOMContentLoaded', function() {
+            updateResults('页面加载完成，可以开始测试导出功能。');
+            updateResults('建议：先在浏览器中确认所有文字都显示居中，然后进行导出测试。');
+        });
+    </script>
+</body>
+</html>

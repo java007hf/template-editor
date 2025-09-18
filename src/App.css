@@ -97,3 +97,32 @@
 .prose a:hover {
   color: #1d4ed8;
 }
+
+/* 修复导出时 span 元素的垂直居中问题 */
+.prose span[style*="background-color"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1.2 !important;
+  vertical-align: baseline !important;
+}
+
+/* 修复所有带背景的内联元素 */
+.prose span[style*="background"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1.2 !important;
+  vertical-align: baseline !important;
+}
+
+/* 确保导出时文本垂直居中 */
+.prose p, .prose div {
+  line-height: 1.6 !important;
+}
+
+/* 修复小字体的垂直对齐 */
+.text-\[10px\] {
+  line-height: 1.2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}

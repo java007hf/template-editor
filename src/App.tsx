@@ -138,7 +138,7 @@ const templates = [
 function App() {
   const [templateData, setTemplateData] = useState<TemplateData>({
     title: '示例标题',
-    content: '# 这里是正文内容\n\n您可以编辑这段文字来预览效果。支持 **Markdown** 格式：\n\n- 列表项目 1\n- 列表项目 2\n- 列表项目 3\n\n> 这是一个引用块\n\n`代码示例` 和 [链接示例](https://example.com)\n\n也支持 HTML 标签：<span style="background-color: #ffff00; border-radius: 8px; padding: 0 3px;">高亮文本</span>',
+    content: '# 这里是正文内容\n\n您可以编辑这段文字来预览效果。支持 **Markdown** 格式：\n\n- 列表项目 1\n- 列表项目 2\n- 列表项目 3\n\n> 这是一个引用块\n\n`代码示例` 和 [链接示例](https://example.com)\n\n也支持 HTML 标签：<span style="background-color: #ffff00; border-radius: 8px; padding: 2px 6px; display: inline-flex; align-items: center; line-height: 1.2;">高亮文本</span>',
     image: null,
     selectedTemplate: 'template1',
     wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果',
@@ -218,7 +218,13 @@ function App() {
       const canvas = await html2canvas(previewRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
-        useCORS: true
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        logging: false,
+        width: previewRef.current.scrollWidth,
+        height: previewRef.current.scrollHeight,
+        imageTimeout: 15000
       })
       
       const link = document.createElement('a')
@@ -234,7 +240,7 @@ function App() {
   const resetForm = () => {
     setTemplateData({
       title: '示例标题',
-      content: '# 这里是正文内容\n\n您可以编辑这段文字来预览效果。支持 **Markdown** 格式：\n\n- 列表项目 1\n- 列表项目 2\n- 列表项目 3\n\n> 这是一个引用块\n\n`代码示例` 和 [链接示例](https://example.com)\n\n也支持 HTML 标签：<span style="background-color: #ffff00; border-radius: 8px; padding: 0 3px;">高亮文本</span>',
+      content: '# 这里是正文内容\n\n您可以编辑这段文字来预览效果。支持 **Markdown** 格式：\n\n- 列表项目 1\n- 列表项目 2\n- 列表项目 3\n\n> 这是一个引用块\n\n`代码示例` 和 [链接示例](https://example.com)\n\n也支持 HTML 标签：<span style="background-color: #ffff00; border-radius: 8px; padding: 2px 6px; display: inline-flex; align-items: center; line-height: 1.2;">高亮文本</span>',
       image: null,
       selectedTemplate: 'template1',
       wordList: '示例\n标题\n正文\n内容\n编辑\n文字\n预览\n效果',
@@ -279,14 +285,23 @@ function App() {
                     <img src={templateData.qrCode} alt="二维码" className="max-w-full h-auto mx-auto rounded-lg shadow-sm" style={{ maxHeight: '120px', objectFit: 'contain' }} />
                   </div>
                 )}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="space-y-1">
+                <div className="bg-gray-50 p-3 rounded-lg" style={{ width: '100%' }}>
+                  <div className="space-y-1" style={{ width: '100%' }}>
                     {templateData.wordList.split('\n').filter(word => word.trim()).map((word, index) => (
                       <div 
                         key={index} 
-                        className={`px-1 py-0.5 rounded-md text-white text-[10px] font-medium text-center shadow-sm ${
+                        className={`px-1 py-0.5 rounded-md text-white text-[10px] font-medium shadow-sm ${
                           index % 2 === 0 ? 'bg-blue-500' : 'bg-yellow-500'
                         }`}
+                        style={{ 
+                          textAlign: 'center', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          width: '100%',
+                          lineHeight: '1.2',
+                          minHeight: '20px'
+                        }}
                       >
                         {word.trim()}
                       </div>

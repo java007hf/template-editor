@@ -62,9 +62,6 @@ export function TextElement({ element }: TextElementProps) {
     lineHeight: 1.4,
     margin: 0,
     padding: element.style.padding || 0,
-    width: '100%',
-    height: '100%',
-    overflow: 'hidden',
     wordWrap: 'break-word',
     whiteSpace: 'pre-wrap'
   }
@@ -82,7 +79,9 @@ export function TextElement({ element }: TextElementProps) {
           border: '2px solid #3b82f6',
           outline: 'none',
           resize: 'none',
-          background: 'transparent'
+          background: 'transparent',
+          width: '100%',
+          height: '100%'
         }}
         className="absolute inset-0"
       />
@@ -92,7 +91,20 @@ export function TextElement({ element }: TextElementProps) {
   return (
     <div
       ref={textRef}
-      style={textStyle}
+      data-element-type="text"
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: element.style.textAlign || 'center',
+        wordWrap: 'break-word',
+        whiteSpace: 'pre-wrap',
+        overflow: 'hidden',
+        ...textStyle
+      }}
       onDoubleClick={handleDoubleClick}
       className="cursor-text select-none hover:bg-blue-50 hover:bg-opacity-30 transition-colors"
     >

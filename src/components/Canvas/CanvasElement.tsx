@@ -128,7 +128,7 @@ export function CanvasElement({
       {...attributes}
     >
       {/* 元素内容 */}
-      <div className="w-full h-full">
+      <div style={{ width: '100%', height: '100%' }}>
         {renderElement()}
       </div>
 

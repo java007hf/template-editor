@@ -46,6 +46,7 @@ export function Canvas({ className }: CanvasProps) {
             setNodeRef(node)
             canvasRef.current = node
           }}
+          data-canvas="true"
           className={`
             relative bg-white shadow-lg border border-gray-200 
             ${isOver ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
